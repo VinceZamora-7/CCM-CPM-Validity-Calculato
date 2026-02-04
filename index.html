@@ -33,7 +33,6 @@
       color-scheme: dark;
     }
 
-    /* Light mode override */
     body.light{
       --bg:#f6f7fb;
       --card: rgba(15,23,42,.05);
@@ -42,7 +41,7 @@
       --muted: rgba(15,23,42,.65);
       --shadow: 0 18px 50px rgba(15,23,42,.12);
 
-      --input-bg: rgba(255,255,255,1);
+      --input-bg: #fff;
       --input-border: rgba(15,23,42,.14);
       --input-text: rgba(15,23,42,.92);
       --input-focus: rgba(124,92,255,.65);
@@ -144,7 +143,6 @@
     }
     .theme-toggle button.active{
       background: rgba(124,92,255,.22);
-      color: var(--text);
     }
 
     .body{padding:16px;}
@@ -279,7 +277,7 @@
         </div>
 
         <div class="head-actions">
-          <div class="pill">Simple: select Subsidiary → uses CCM Range (± days)</div>
+          <div class="pill">Select Subsidiary → uses CCM Range (± days)</div>
           <div class="theme-toggle" role="group" aria-label="Theme toggle">
             <button id="btnDark" type="button" class="active" aria-label="Dark mode">Dark</button>
             <button id="btnLight" type="button" aria-label="Light mode">Light</button>
@@ -288,19 +286,12 @@
       </div>
 
       <div class="body">
-        <div class="row">
-          <div>
-            <label for="subsidiary">Subsidiary</label>
-            <select id="subsidiary" aria-label="Subsidiary">
-              <option value="" selected disabled>Select subsidiary…</option>
-            </select>
-            <p class="hint" id="rangeHint">CCM Range: —</p>
-          </div>
-
-          <div>
-            <label for="area">Area</label>
-            <input id="area" type="text" readonly aria-label="Area name" placeholder="—" />
-          </div>
+        <div>
+          <label for="subsidiary">Subsidiary</label>
+          <select id="subsidiary" aria-label="Subsidiary">
+            <option value="" selected disabled>Select subsidiary…</option>
+          </select>
+          <p class="hint" id="rangeHint">CCM Range: —</p>
         </div>
 
         <div class="row" style="margin-top:12px;">
@@ -322,7 +313,7 @@
 
         <p class="hint">
           Validity is checked “as of today” using the selected Subsidiary’s <b>± range days</b>.
-          CPM is also checked to be <b>on/after CCM</b> (if both dates are provided).
+          CPM is also checked to be <b>on/after CCM</b>.
         </p>
       </div>
     </section>
@@ -330,7 +321,7 @@
     <section class="card">
       <div class="head">
         <p class="sub">Result</p>
-        <div class="sub">CCM + CPM validity</div>
+        <div class="sub">Valid / Not Valid</div>
       </div>
 
       <div class="body">
@@ -383,157 +374,158 @@
       btnLight.classList.toggle("active", mode === "light");
       localStorage.setItem("ccm_theme", mode);
     }
-
     btnDark.addEventListener("click", () => applyTheme("dark"));
     btnLight.addEventListener("click", () => applyTheme("light"));
     applyTheme(localStorage.getItem("ccm_theme") || "dark");
 
-    // --- Subsidiary data (AreaName, SubsidiaryName, CCM Range days) ---
-    // Note: One MEA row has blank SubsidiaryName; labeled here as "MEA (Unspecified)".
+    // --- Subsidiary -> range days (from your list) ---
+    // Blank line kept as "(Unspecified)" with +/- 2 days.
     const SUBSIDIARIES = [
-      { area:"ANZ", name:"Australia", range:2 },
-      { area:"ANZ", name:"New Zealand", range:2 },
+      { name:"Australia", range:2 },
+      { name:"New Zealand", range:2 },
+      { name:"Vietnam", range:2 },
+      { name:"Thailand", range:2 },
+      { name:"Singapore", range:2 },
+      { name:"South East Asia Multi Country", range:2 },
+      { name:"Indonesia", range:2 },
+      { name:"Malaysia", range:2 },
+      { name:"Brunei", range:2 },
+      { name:"Cambodia", range:2 },
+      { name:"Philippines", range:2 },
+      { name:"Myanmar", range:2 },
+      { name:"Canada", range:2 },
+      { name:"(Unspecified)", range:2 },
 
-      { area:"ASEAN", name:"Vietnam", range:2 },
-      { area:"ASEAN", name:"Thailand", range:2 },
-      { area:"ASEAN", name:"Singapore", range:2 },
-      { area:"ASEAN", name:"South East Asia Multi Country", range:2 },
-      { area:"ASEAN", name:"Indonesia", range:2 },
-      { area:"ASEAN", name:"Malaysia", range:2 },
-      { area:"ASEAN", name:"Brunei", range:2 },
-      { area:"ASEAN", name:"Cambodia", range:2 },
-      { area:"ASEAN", name:"Philippines", range:2 },
-      { area:"ASEAN", name:"Myanmar", range:2 },
+      { name:"MEA EMCC Scale", range:3 },
+      { name:"Iran", range:3 },
+      { name:"Israel", range:3 },
+      { name:"Uganda", range:3 },
+      { name:"Angola", range:3 },
 
-      { area:"Canada", name:"Canada", range:2 },
+      { name:"Greece", range:2 },
+      { name:"Slovenia", range:2 },
+      { name:"Slovakia", range:2 },
+      { name:"Kazakhstan", range:2 },
+      { name:"Ukraine", range:2 },
+      { name:"Bulgaria", range:2 },
 
-      { area:"MEA", name:"MEA (Unspecified)", range:2 },
-      { area:"MEA", name:"MEA EMCC Scale", range:3 },
-      { area:"MEA", name:"Iran", range:3 },
-      { area:"South Europe", name:"Israel", range:3 },
-      { area:"MEA", name:"Uganda", range:3 },
-      { area:"MEA", name:"Angola", range:3 },
+      { name:"Egypt", range:3 },
+      { name:"South Africa", range:3 },
+      { name:"Jordan", range:3 },
+      { name:"Pakistan", range:3 },
+      { name:"Iraq", range:3 },
+      { name:"Qatar", range:3 },
 
-      { area:"South Europe", name:"Greece", range:2 },
-      { area:"South Europe", name:"Slovenia", range:2 },
-      { area:"North Europe", name:"Slovakia", range:2 },
-      { area:"North Europe", name:"Kazakhstan", range:2 },
-      { area:"North Europe", name:"Ukraine", range:2 },
-      { area:"South Europe", name:"Bulgaria", range:2 },
+      { name:"Georgia", range:2 },
+      { name:"Serbia", range:2 },
 
-      { area:"MEA", name:"Egypt", range:3 },
-      { area:"MEA", name:"South Africa", range:3 },
-      { area:"MEA", name:"Jordan", range:3 },
-      { area:"North Europe", name:"Pakistan", range:3 },
-      { area:"MEA", name:"Iraq", range:3 },
-      { area:"MEA", name:"Qatar", range:3 },
+      { name:"Kuwait", range:3 },
+      { name:"Montenegro", range:2 },
+      { name:"Botswana", range:3 },
+      { name:"Bahrain", range:3 },
+      { name:"Azerbaijan", range:2 },
+      { name:"Hungary", range:2 },
+      { name:"Côte d'Ivoire", range:3 },
+      { name:"Nigeria", range:3 },
+      { name:"Algeria", range:3 },
+      { name:"Oman", range:3 },
+      { name:"Zambia", range:3 },
 
-      { area:"North Europe", name:"Georgia", range:2 },
-      { area:"South Europe", name:"Serbia", range:2 },
-      { area:"MEA", name:"Kuwait", range:3 },
-      { area:"South Europe", name:"Montenegro", range:2 },
-      { area:"MEA", name:"Botswana", range:3 },
-      { area:"MEA", name:"Bahrain", range:3 },
-      { area:"North Europe", name:"Azerbaijan", range:2 },
-      { area:"North Europe", name:"Hungary", range:2 },
-      { area:"MEA", name:"Côte d'Ivoire", range:3 },
-      { area:"MEA", name:"Nigeria", range:3 },
-      { area:"MEA", name:"Algeria", range:3 },
-      { area:"MEA", name:"Oman", range:3 },
-      { area:"MEA", name:"Zambia", range:3 },
-      { area:"South Europe", name:"North Macedonia", range:2 },
-      { area:"MEA", name:"Kenya", range:3 },
-      { area:"MEA", name:"Mauritius", range:3 },
-      { area:"North Europe", name:"Turkmenistan", range:2 },
-      { area:"MEA", name:"Morocco", range:3 },
-      { area:"North Europe", name:"Czechia", range:2 },
-      { area:"South Europe", name:"Malta", range:2 },
-      { area:"MEA", name:"Ghana", range:3 },
-      { area:"MEA", name:"Libya", range:3 },
-      { area:"South Europe", name:"Turkey", range:3 },
-      { area:"South Europe", name:"Cyprus", range:2 },
-      { area:"MEA", name:"Saudi Arabia", range:3 },
-      { area:"MEA", name:"Senegal", range:3 },
-      { area:"South Europe", name:"Russia", range:2 },
-      { area:"MEA", name:"Lebanon", range:3 },
-      { area:"MEA", name:"United Arab Emirates", range:3 },
-      { area:"North Europe", name:"Moldova", range:2 },
-      { area:"MEA", name:"Cameroon", range:3 },
-      { area:"South Europe", name:"Belarus", range:2 },
-      { area:"North Europe", name:"Lithuania", range:2 },
-      { area:"North Europe", name:"Armenia", range:2 },
-      { area:"South Europe", name:"Albania", range:2 },
-      { area:"North Europe", name:"Poland", range:2 },
-      { area:"South Europe", name:"Kosovo", range:2 },
-      { area:"North Europe", name:"Romania", range:2 },
-      { area:"North Europe", name:"Estonia", range:2 },
-      { area:"South Europe", name:"Bosnia and Herzegovina", range:2 },
-      { area:"MEA", name:"Tunisia", range:3 },
-      { area:"North Europe", name:"Latvia", range:2 },
-      { area:"South Europe", name:"Croatia", range:2 },
+      { name:"North Macedonia", range:2 },
+      { name:"Kenya", range:3 },
+      { name:"Mauritius", range:3 },
+      { name:"Turkmenistan", range:2 },
+      { name:"Morocco", range:3 },
+      { name:"Czechia", range:2 },
+      { name:"Malta", range:2 },
+      { name:"Ghana", range:3 },
+      { name:"Libya", range:3 },
+      { name:"Turkey", range:3 },
+      { name:"Cyprus", range:2 },
 
-      { area:"France", name:"France", range:3 },
-      { area:"Germany & Austria", name:"Germany", range:2 },
+      { name:"Saudi Arabia", range:3 },
+      { name:"Senegal", range:3 },
 
-      { area:"Greater China", name:"Hong Kong", range:2 },
-      { area:"Greater China", name:"Taiwan", range:2 },
-      { area:"Greater China", name:"China", range:2 },
+      { name:"Russia", range:2 },
 
-      { area:"India", name:"Sri Lanka", range:2 },
-      { area:"India", name:"India SC", range:2 },
-      { area:"India", name:"Bangladesh", range:2 },
+      { name:"Lebanon", range:3 },
+      { name:"United Arab Emirates", range:3 },
+      { name:"Moldova", range:2 },
+      { name:"Cameroon", range:3 },
 
-      { area:"Japan", name:"Japan", range:2 },
-      { area:"Korea", name:"Korea", range:2 },
+      { name:"Belarus", range:2 },
+      { name:"Lithuania", range:2 },
+      { name:"Armenia", range:2 },
+      { name:"Albania", range:2 },
+      { name:"Poland", range:2 },
+      { name:"Kosovo", range:2 },
+      { name:"Romania", range:2 },
+      { name:"Estonia", range:2 },
+      { name:"Bosnia and Herzegovina", range:2 },
+      { name:"Tunisia", range:3 },
+      { name:"Latvia", range:2 },
+      { name:"Croatia", range:2 },
 
-      { area:"Latam", name:"Trinidad & Tobago", range:2 },
-      { area:"Latam", name:"Uruguay", range:2 },
-      { area:"Latam", name:"Venezuela", range:2 },
-      { area:"Latam", name:"Colombia", range:2 },
-      { area:"Latam", name:"El Salvador", range:2 },
-      { area:"Latam", name:"Caribbean New Markets", range:2 },
-      { area:"Latam", name:"Puerto Rico", range:2 },
-      { area:"Latam", name:"Ecuador", range:2 },
-      { area:"Latam", name:"LNM - HQ", range:2 },
-      { area:"Latam", name:"Latin America HQ", range:2 },
-      { area:"Latam", name:"Honduras", range:2 },
-      { area:"Latam", name:"Panama", range:2 },
-      { area:"Latam", name:"Chile", range:2 },
-      { area:"Latam", name:"Guatemala", range:2 },
-      { area:"Latam", name:"Paraguay", range:2 },
-      { area:"Latam", name:"Brazil", range:2 },
-      { area:"Latam", name:"Bolivia", range:2 },
-      { area:"Latam", name:"Costa Rica", range:2 },
-      { area:"Latam", name:"Jamaica", range:2 },
-      { area:"Latam", name:"Dominican Republic", range:2 },
-      { area:"Latam", name:"Peru", range:2 },
-      { area:"Latam", name:"Mexico", range:2 },
-      { area:"Latam", name:"Argentina", range:2 },
+      { name:"France", range:3 },
+      { name:"Germany", range:2 },
+      { name:"Hong Kong", range:2 },
+      { name:"Taiwan", range:2 },
+      { name:"China", range:2 },
 
-      { area:"Netherlands", name:"Netherlands", range:2 },
-      { area:"Switzerland", name:"Switzerland", range:2 },
-      { area:"UK & Ireland", name:"United Kingdom", range:2 },
-      { area:"United States", name:"United States", range:2 },
+      { name:"Sri Lanka", range:2 },
+      { name:"India SC", range:2 },
+      { name:"Bangladesh", range:2 },
 
-      { area:"South Europe", name:"Italy", range:2 },
-      { area:"North Europe", name:"Norway", range:2 },
-      { area:"South Europe", name:"Spain", range:2 },
-      { area:"North Europe", name:"Denmark", range:2 },
-      { area:"Germany & Austria", name:"Austria", range:2 },
-      { area:"North Europe", name:"Belgium", range:2 },
-      { area:"UK & Ireland", name:"Ireland", range:2 },
-      { area:"North Europe", name:"Iceland", range:2 },
-      { area:"South Europe", name:"Portugal", range:2 },
-      { area:"North Europe", name:"Finland", range:2 },
-      { area:"North Europe", name:"Sweden", range:2 },
-      { area:"North Europe", name:"Luxembourg", range:2 },
+      { name:"Japan", range:2 },
+      { name:"Korea", range:2 },
+
+      { name:"Trinidad & Tobago", range:2 },
+      { name:"Uruguay", range:2 },
+      { name:"Venezuela", range:2 },
+      { name:"Colombia", range:2 },
+      { name:"El Salvador", range:2 },
+      { name:"Caribbean New Markets", range:2 },
+      { name:"Puerto Rico", range:2 },
+      { name:"Ecuador", range:2 },
+      { name:"LNM - HQ", range:2 },
+      { name:"Latin America HQ", range:2 },
+      { name:"Honduras", range:2 },
+      { name:"Panama", range:2 },
+      { name:"Chile", range:2 },
+      { name:"Guatemala", range:2 },
+      { name:"Paraguay", range:2 },
+      { name:"Brazil", range:2 },
+      { name:"Bolivia", range:2 },
+      { name:"Costa Rica", range:2 },
+      { name:"Jamaica", range:2 },
+      { name:"Dominican Republic", range:2 },
+      { name:"Peru", range:2 },
+      { name:"Mexico", range:2 },
+      { name:"Argentina", range:2 },
+
+      { name:"Netherlands", range:2 },
+      { name:"Switzerland", range:2 },
+      { name:"United Kingdom", range:2 },
+      { name:"United States", range:2 },
+
+      { name:"Italy", range:2 },
+      { name:"Norway", range:2 },
+      { name:"Spain", range:2 },
+      { name:"Denmark", range:2 },
+      { name:"Austria", range:2 },
+      { name:"Belgium", range:2 },
+      { name:"Ireland", range:2 },
+      { name:"Iceland", range:2 },
+      { name:"Portugal", range:2 },
+      { name:"Finland", range:2 },
+      { name:"Sweden", range:2 },
+      { name:"Luxembourg", range:2 },
     ];
 
     const byName = Object.fromEntries(SUBSIDIARIES.map(s => [s.name, s]));
 
     // --- DOM ---
     const elSubsidiary = document.getElementById("subsidiary");
-    const elArea = document.getElementById("area");
     const elRangeHint = document.getElementById("rangeHint");
     const elCCM = document.getElementById("ccmDate");
     const elCPM = document.getElementById("cpmDate");
@@ -553,25 +545,14 @@
     const today = new Date();
     document.getElementById("todayText").textContent = "As of: " + fmt(today);
 
-    // --- Populate dropdown (group by Area) ---
+    // --- Populate dropdown ---
     function populate(){
-      const groups = new Map();
-      for (const s of SUBSIDIARIES){
-        if (!groups.has(s.area)) groups.set(s.area, []);
-        groups.get(s.area).push(s);
-      }
-      const areas = Array.from(groups.keys()).sort((a,b)=>a.localeCompare(b));
-      for (const area of areas){
-        const og = document.createElement("optgroup");
-        og.label = area;
-        const list = groups.get(area).slice().sort((a,b)=>a.name.localeCompare(b.name));
-        for (const s of list){
-          const opt = document.createElement("option");
-          opt.value = s.name;
-          opt.textContent = `${s.name} (±${s.range}d)`;
-          og.appendChild(opt);
-        }
-        elSubsidiary.appendChild(og);
+      const list = SUBSIDIARIES.slice().sort((a,b)=>a.name.localeCompare(b.name));
+      for (const s of list){
+        const opt = document.createElement("option");
+        opt.value = s.name;
+        opt.textContent = `${s.name} (±${s.range}d)`;
+        elSubsidiary.appendChild(opt);
       }
     }
     populate();
@@ -615,13 +596,7 @@
 
     function updateHint(){
       const s = byName[elSubsidiary.value];
-      if (!s){
-        elArea.value = "";
-        elRangeHint.textContent = "CCM Range: —";
-        return;
-      }
-      elArea.value = s.area;
-      elRangeHint.textContent = `CCM Range: ± ${s.range} day(s)`;
+      elRangeHint.textContent = s ? `CCM Range: ± ${s.range} day(s)` : "CCM Range: —";
     }
 
     elSubsidiary.addEventListener("change", () => {
@@ -682,7 +657,6 @@
       const payload = {
         asOf: fmt(today),
         subsidiary: sel.name,
-        area: sel.area,
         rangeDays: range,
         ccmDate: fmt(ccm),
         cpmDate: fmt(cpm),
@@ -701,9 +675,7 @@
     document.getElementById("calcBtn").addEventListener("click", calculate);
 
     document.getElementById("resetBtn").addEventListener("click", () => {
-      // reset inputs (only those in this page)
       elSubsidiary.value = "";
-      elArea.value = "";
       elRangeHint.textContent = "CCM Range: —";
       elCCM.value = "";
       elCPM.value = "";
@@ -724,14 +696,13 @@
       const payload = calculate();
       const text =
         payload && payload.subsidiary
-          ? `As of ${payload.asOf} | ${payload.subsidiary} (${payload.area}) ±${payload.rangeDays}d | CCM: ${payload.ccmValidToday ? "VALID" : "NOT VALID"} | CPM: ${payload.cpmValidToday ? "VALID" : "NOT VALID"} | CPM≥CCM: ${payload.cpmOnOrAfterCcm ? "YES" : "NO"} | OVERALL: ${payload.overallValid ? "VALID" : "NOT VALID"}`
+          ? `As of ${payload.asOf} | ${payload.subsidiary} ±${payload.rangeDays}d | CCM: ${payload.ccmValidToday ? "VALID" : "NOT VALID"} | CPM: ${payload.cpmValidToday ? "VALID" : "NOT VALID"} | CPM≥CCM: ${payload.cpmOnOrAfterCcm ? "YES" : "NO"} | OVERALL: ${payload.overallValid ? "VALID" : "NOT VALID"}`
           : jsonOut.value;
 
       try{
         await navigator.clipboard.writeText(text);
         showToast("Copied!");
       }catch(e){
-        // fallback
         jsonOut.focus();
         jsonOut.select();
         document.execCommand("copy");
