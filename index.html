@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CCM/CPM Validity Calculator</title>
+  <style>
+    :root{
+      /* Dark (default) */
+      --bg:#0b1220;
+      --card:rgba(255,255,255,.06);
+      --line:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --good:#2ee59d;
+      --bad:#ff5c7a;
+      --warn:#ffcc66;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --r:18px;
+
+      --input-bg: rgba(255,255,255,.04);
+      --input-border: var(--line);
+      --input-text: var(--text);
+      --input-focus: rgba(124,92,255,.65);
+      --ring: 0 0 0 4px rgba(124,92,255,.18);
+
+      --btn-bg: rgba(255,255,255,.06);
+      --btn-border: var(--line);
+
+      --toast-bg: rgba(0,0,0,.78);
+
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color-scheme: dark;
+    }
+
+    /* Light mode override */
+    body.light{
+      --bg:#f6f7fb;
+      --card: rgba(15,23,42,.05);
+      --line: rgba(15,23,42,.12);
+      --text: rgba(15,23,42,.92);
+      --muted: rgba(15,23,42,.65);
+      --shadow: 0 18px 50px rgba(15,23,42,.12);
+
+      --input-bg: rgba(255,255,255,1);
+      --input-border: rgba(15,23,42,.14);
+      --input-text: rgba(15,23,42,.92);
+      --input-focus: rgba(124,92,255,.65);
+      --ring: 0 0 0 4px rgba(124,92,255,.14);
+
+      --btn-bg: rgba(15,23,42,.06);
+      --btn-border: rgba(15,23,42,.14);
+
+      --toast-bg: rgba(15,23,42,.9);
+
+      color-scheme: light;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 900px at 20% -10%, rgba(124,92,255,0.18), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(46,229,157,0.12), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px 16px;
+    }
+
+    .wrap{width:min(920px,100%); display:grid; gap:14px;}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .head{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+    }
+
+    .title{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius:14px;
+      background: linear-gradient(135deg, rgba(124,92,255,1), rgba(46,229,157,1));
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+      flex:0 0 auto;
+    }
+    h1{margin:0; font-size:16px; letter-spacing:-.01em;}
+    .sub{margin:2px 0 0; color:var(--muted); font-size:12px; font-weight:800;}
+
+    .head-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight:900;
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .theme-toggle{
+      display:inline-flex;
+      border:1px solid var(--line);
+      border-radius:999px;
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    .theme-toggle button{
+      border:0;
+      background: transparent;
+      color: var(--text);
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
+    }
+    .theme-toggle button.active{
+      background: rgba(124,92,255,.22);
+      color: var(--text);
+    }
+
+    .body{padding:16px;}
+
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px; font-weight:800;}
+
+    input, select, textarea{
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--input-border);
+      background:var(--input-bg);
+      color:var(--input-text);
+      outline:none;
+      font-size:14px;
+    }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--input-focus);
+      box-shadow:var(--ring);
+    }
+
+    /* Fix: dropdown options in dark mode showing white background */
+    select option, select optgroup{
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    body.light select option, body.light select optgroup{
+      background-color: #fff;
+      color: #0f172a;
+    }
+
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+    @media (max-width:560px){ .row{grid-template-columns:1fr;} }
+
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+    button{
+      border:1px solid var(--btn-border);
+      background:var(--btn-bg);
+      color:var(--text);
+      border-radius:14px;
+      padding:11px 12px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    button.primary{
+      background:linear-gradient(135deg, rgba(124,92,255,1), rgba(46,229,157,1));
+      border-color:transparent;
+      color:#08111f;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.02em;
+      background:rgba(255,255,255,.03);
+    }
+
+    .dot{width:10px; height:10px; border-radius:50%; background:var(--warn);}
+    .chip.good .dot{background:var(--good);}
+    .chip.bad .dot{background:var(--bad);}
+
+    .kv{display:grid; gap:10px; margin-top:12px;}
+    .item{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-size:13px;
+    }
+    .k{color:var(--muted); font-weight:800;}
+    .v{font-weight:900; text-align:right;}
+
+    .hint{margin:8px 0 0; color:var(--muted); font-size:12px; line-height:1.4;}
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      font-size:12px;
+      line-height:1.4;
+      margin-top:10px;
+    }
+
+    .toast{
+      position:fixed;
+      bottom:18px; left:50%;
+      transform:translateX(-50%);
+      padding:10px 12px;
+      border-radius:999px;
+      background:var(--toast-bg);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+      font-size:13px;
+      z-index:50;
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(-4px);}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <div class="head">
+        <div class="title">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>CCM/CPM Validity Calculator</h1>
+            <p class="sub" id="todayText"></p>
+          </div>
+        </div>
+
+        <div class="head-actions">
+          <div class="pill">Simple: select Subsidiary → uses CCM Range (± days)</div>
+          <div class="theme-toggle" role="group" aria-label="Theme toggle">
+            <button id="btnDark" type="button" class="active" aria-label="Dark mode">Dark</button>
+            <button id="btnLight" type="button" aria-label="Light mode">Light</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="row">
+          <div>
+            <label for="subsidiary">Subsidiary</label>
+            <select id="subsidiary" aria-label="Subsidiary">
+              <option value="" selected disabled>Select subsidiary…</option>
+            </select>
+            <p class="hint" id="rangeHint">CCM Range: —</p>
+          </div>
+
+          <div>
+            <label for="area">Area</label>
+            <input id="area" type="text" readonly aria-label="Area name" placeholder="—" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label for="ccmDate">CCM Date</label>
+            <input id="ccmDate" type="date" aria-label="CCM Date" />
+          </div>
+          <div>
+            <label for="cpmDate">CPM Date</label>
+            <input id="cpmDate" type="date" aria-label="CPM Date" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" type="button" id="calcBtn">Calculate</button>
+          <button type="button" id="resetBtn">Reset</button>
+          <button type="button" id="copyBtn">Copy Result</button>
+        </div>
+
+        <p class="hint">
+          Validity is checked “as of today” using the selected Subsidiary’s <b>± range days</b>.
+          CPM is also checked to be <b>on/after CCM</b> (if both dates are provided).
+        </p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <p class="sub">Result</p>
+        <div class="sub">CCM + CPM validity</div>
+      </div>
+
+      <div class="body">
+        <div class="status" aria-live="polite">
+          <div class="chip" id="overallChip">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="overallText">Waiting for input</span>
+          </div>
+          <div class="sub" id="overallShort">—</div>
+        </div>
+
+        <div class="kv">
+          <div class="item">
+            <div class="k">CCM Window</div>
+            <div class="v" id="ccmWindow">—</div>
+          </div>
+          <div class="item">
+            <div class="k">CCM Status</div>
+            <div class="v" id="ccmStatus">—</div>
+          </div>
+          <div class="item">
+            <div class="k">CPM Window</div>
+            <div class="v" id="cpmWindow">—</div>
+          </div>
+          <div class="item">
+            <div class="k">CPM Status</div>
+            <div class="v" id="cpmStatus">—</div>
+          </div>
+          <div class="item">
+            <div class="k">CPM ≥ CCM</div>
+            <div class="v" id="orderStatus">—</div>
+          </div>
+        </div>
+
+        <textarea id="jsonOut" readonly placeholder="Result JSON will appear here..."></textarea>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    // --- Theme (saved) ---
+    const btnDark = document.getElementById("btnDark");
+    const btnLight = document.getElementById("btnLight");
+
+    function applyTheme(mode){
+      document.body.classList.toggle("light", mode === "light");
+      btnDark.classList.toggle("active", mode !== "light");
+      btnLight.classList.toggle("active", mode === "light");
+      localStorage.setItem("ccm_theme", mode);
+    }
+
+    btnDark.addEventListener("click", () => applyTheme("dark"));
+    btnLight.addEventListener("click", () => applyTheme("light"));
+    applyTheme(localStorage.getItem("ccm_theme") || "dark");
+
+    // --- Subsidiary data (AreaName, SubsidiaryName, CCM Range days) ---
+    // Note: One MEA row has blank SubsidiaryName; labeled here as "MEA (Unspecified)".
+    const SUBSIDIARIES = [
+      { area:"ANZ", name:"Australia", range:2 },
+      { area:"ANZ", name:"New Zealand", range:2 },
+
+      { area:"ASEAN", name:"Vietnam", range:2 },
+      { area:"ASEAN", name:"Thailand", range:2 },
+      { area:"ASEAN", name:"Singapore", range:2 },
+      { area:"ASEAN", name:"South East Asia Multi Country", range:2 },
+      { area:"ASEAN", name:"Indonesia", range:2 },
+      { area:"ASEAN", name:"Malaysia", range:2 },
+      { area:"ASEAN", name:"Brunei", range:2 },
+      { area:"ASEAN", name:"Cambodia", range:2 },
+      { area:"ASEAN", name:"Philippines", range:2 },
+      { area:"ASEAN", name:"Myanmar", range:2 },
+
+      { area:"Canada", name:"Canada", range:2 },
+
+      { area:"MEA", name:"MEA (Unspecified)", range:2 },
+      { area:"MEA", name:"MEA EMCC Scale", range:3 },
+      { area:"MEA", name:"Iran", range:3 },
+      { area:"South Europe", name:"Israel", range:3 },
+      { area:"MEA", name:"Uganda", range:3 },
+      { area:"MEA", name:"Angola", range:3 },
+
+      { area:"South Europe", name:"Greece", range:2 },
+      { area:"South Europe", name:"Slovenia", range:2 },
+      { area:"North Europe", name:"Slovakia", range:2 },
+      { area:"North Europe", name:"Kazakhstan", range:2 },
+      { area:"North Europe", name:"Ukraine", range:2 },
+      { area:"South Europe", name:"Bulgaria", range:2 },
+
+      { area:"MEA", name:"Egypt", range:3 },
+      { area:"MEA", name:"South Africa", range:3 },
+      { area:"MEA", name:"Jordan", range:3 },
+      { area:"North Europe", name:"Pakistan", range:3 },
+      { area:"MEA", name:"Iraq", range:3 },
+      { area:"MEA", name:"Qatar", range:3 },
+
+      { area:"North Europe", name:"Georgia", range:2 },
+      { area:"South Europe", name:"Serbia", range:2 },
+      { area:"MEA", name:"Kuwait", range:3 },
+      { area:"South Europe", name:"Montenegro", range:2 },
+      { area:"MEA", name:"Botswana", range:3 },
+      { area:"MEA", name:"Bahrain", range:3 },
+      { area:"North Europe", name:"Azerbaijan", range:2 },
+      { area:"North Europe", name:"Hungary", range:2 },
+      { area:"MEA", name:"Côte d'Ivoire", range:3 },
+      { area:"MEA", name:"Nigeria", range:3 },
+      { area:"MEA", name:"Algeria", range:3 },
+      { area:"MEA", name:"Oman", range:3 },
+      { area:"MEA", name:"Zambia", range:3 },
+      { area:"South Europe", name:"North Macedonia", range:2 },
+      { area:"MEA", name:"Kenya", range:3 },
+      { area:"MEA", name:"Mauritius", range:3 },
+      { area:"North Europe", name:"Turkmenistan", range:2 },
+      { area:"MEA", name:"Morocco", range:3 },
+      { area:"North Europe", name:"Czechia", range:2 },
+      { area:"South Europe", name:"Malta", range:2 },
+      { area:"MEA", name:"Ghana", range:3 },
+      { area:"MEA", name:"Libya", range:3 },
+      { area:"South Europe", name:"Turkey", range:3 },
+      { area:"South Europe", name:"Cyprus", range:2 },
+      { area:"MEA", name:"Saudi Arabia", range:3 },
+      { area:"MEA", name:"Senegal", range:3 },
+      { area:"South Europe", name:"Russia", range:2 },
+      { area:"MEA", name:"Lebanon", range:3 },
+      { area:"MEA", name:"United Arab Emirates", range:3 },
+      { area:"North Europe", name:"Moldova", range:2 },
+      { area:"MEA", name:"Cameroon", range:3 },
+      { area:"South Europe", name:"Belarus", range:2 },
+      { area:"North Europe", name:"Lithuania", range:2 },
+      { area:"North Europe", name:"Armenia", range:2 },
+      { area:"South Europe", name:"Albania", range:2 },
+      { area:"North Europe", name:"Poland", range:2 },
+      { area:"South Europe", name:"Kosovo", range:2 },
+      { area:"North Europe", name:"Romania", range:2 },
+      { area:"North Europe", name:"Estonia", range:2 },
+      { area:"South Europe", name:"Bosnia and Herzegovina", range:2 },
+      { area:"MEA", name:"Tunisia", range:3 },
+      { area:"North Europe", name:"Latvia", range:2 },
+      { area:"South Europe", name:"Croatia", range:2 },
+
+      { area:"France", name:"France", range:3 },
+      { area:"Germany & Austria", name:"Germany", range:2 },
+
+      { area:"Greater China", name:"Hong Kong", range:2 },
+      { area:"Greater China", name:"Taiwan", range:2 },
+      { area:"Greater China", name:"China", range:2 },
+
+      { area:"India", name:"Sri Lanka", range:2 },
+      { area:"India", name:"India SC", range:2 },
+      { area:"India", name:"Bangladesh", range:2 },
+
+      { area:"Japan", name:"Japan", range:2 },
+      { area:"Korea", name:"Korea", range:2 },
+
+      { area:"Latam", name:"Trinidad & Tobago", range:2 },
+      { area:"Latam", name:"Uruguay", range:2 },
+      { area:"Latam", name:"Venezuela", range:2 },
+      { area:"Latam", name:"Colombia", range:2 },
+      { area:"Latam", name:"El Salvador", range:2 },
+      { area:"Latam", name:"Caribbean New Markets", range:2 },
+      { area:"Latam", name:"Puerto Rico", range:2 },
+      { area:"Latam", name:"Ecuador", range:2 },
+      { area:"Latam", name:"LNM - HQ", range:2 },
+      { area:"Latam", name:"Latin America HQ", range:2 },
+      { area:"Latam", name:"Honduras", range:2 },
+      { area:"Latam", name:"Panama", range:2 },
+      { area:"Latam", name:"Chile", range:2 },
+      { area:"Latam", name:"Guatemala", range:2 },
+      { area:"Latam", name:"Paraguay", range:2 },
+      { area:"Latam", name:"Brazil", range:2 },
+      { area:"Latam", name:"Bolivia", range:2 },
+      { area:"Latam", name:"Costa Rica", range:2 },
+      { area:"Latam", name:"Jamaica", range:2 },
+      { area:"Latam", name:"Dominican Republic", range:2 },
+      { area:"Latam", name:"Peru", range:2 },
+      { area:"Latam", name:"Mexico", range:2 },
+      { area:"Latam", name:"Argentina", range:2 },
+
+      { area:"Netherlands", name:"Netherlands", range:2 },
+      { area:"Switzerland", name:"Switzerland", range:2 },
+      { area:"UK & Ireland", name:"United Kingdom", range:2 },
+      { area:"United States", name:"United States", range:2 },
+
+      { area:"South Europe", name:"Italy", range:2 },
+      { area:"North Europe", name:"Norway", range:2 },
+      { area:"South Europe", name:"Spain", range:2 },
+      { area:"North Europe", name:"Denmark", range:2 },
+      { area:"Germany & Austria", name:"Austria", range:2 },
+      { area:"North Europe", name:"Belgium", range:2 },
+      { area:"UK & Ireland", name:"Ireland", range:2 },
+      { area:"North Europe", name:"Iceland", range:2 },
+      { area:"South Europe", name:"Portugal", range:2 },
+      { area:"North Europe", name:"Finland", range:2 },
+      { area:"North Europe", name:"Sweden", range:2 },
+      { area:"North Europe", name:"Luxembourg", range:2 },
+    ];
+
+    const byName = Object.fromEntries(SUBSIDIARIES.map(s => [s.name, s]));
+
+    // --- DOM ---
+    const elSubsidiary = document.getElementById("subsidiary");
+    const elArea = document.getElementById("area");
+    const elRangeHint = document.getElementById("rangeHint");
+    const elCCM = document.getElementById("ccmDate");
+    const elCPM = document.getElementById("cpmDate");
+
+    const overallChip = document.getElementById("overallChip");
+    const overallText = document.getElementById("overallText");
+    const overallShort = document.getElementById("overallShort");
+    const ccmWindow = document.getElementById("ccmWindow");
+    const ccmStatus = document.getElementById("ccmStatus");
+    const cpmWindow = document.getElementById("cpmWindow");
+    const cpmStatus = document.getElementById("cpmStatus");
+    const orderStatus = document.getElementById("orderStatus");
+    const jsonOut = document.getElementById("jsonOut");
+    const toast = document.getElementById("toast");
+
+    // --- Today ---
+    const today = new Date();
+    document.getElementById("todayText").textContent = "As of: " + fmt(today);
+
+    // --- Populate dropdown (group by Area) ---
+    function populate(){
+      const groups = new Map();
+      for (const s of SUBSIDIARIES){
+        if (!groups.has(s.area)) groups.set(s.area, []);
+        groups.get(s.area).push(s);
+      }
+      const areas = Array.from(groups.keys()).sort((a,b)=>a.localeCompare(b));
+      for (const area of areas){
+        const og = document.createElement("optgroup");
+        og.label = area;
+        const list = groups.get(area).slice().sort((a,b)=>a.name.localeCompare(b.name));
+        for (const s of list){
+          const opt = document.createElement("option");
+          opt.value = s.name;
+          opt.textContent = `${s.name} (±${s.range}d)`;
+          og.appendChild(opt);
+        }
+        elSubsidiary.appendChild(og);
+      }
+    }
+    populate();
+
+    function parseDate(val){
+      if (!val) return null;
+      const [y,m,d] = val.split("-").map(Number);
+      if (!y || !m || !d) return null;
+      return new Date(y, m-1, d, 12, 0, 0);
+    }
+
+    function stamp(d){
+      return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
+    function addDays(d, n){
+      const x = new Date(d.getTime());
+      x.setDate(x.getDate() + n);
+      return x;
+    }
+
+    function fmt(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function setOverall(ok, text){
+      overallChip.classList.remove("good","bad");
+      overallChip.classList.add(ok ? "good" : "bad");
+      overallText.textContent = ok ? "OVERALL: VALID" : "OVERALL: NOT VALID";
+      overallShort.textContent = text;
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(()=>toast.classList.remove("show"), 900);
+    }
+
+    function updateHint(){
+      const s = byName[elSubsidiary.value];
+      if (!s){
+        elArea.value = "";
+        elRangeHint.textContent = "CCM Range: —";
+        return;
+      }
+      elArea.value = s.area;
+      elRangeHint.textContent = `CCM Range: ± ${s.range} day(s)`;
+    }
+
+    elSubsidiary.addEventListener("change", () => {
+      updateHint();
+      if (elCCM.value || elCPM.value) calculate();
+    });
+
+    function calculate(){
+      const sel = byName[elSubsidiary.value];
+      const range = sel ? sel.range : null;
+
+      const ccm = parseDate(elCCM.value);
+      const cpm = parseDate(elCPM.value);
+
+      const issues = [];
+      if (!sel) issues.push("Select a subsidiary.");
+      if (!ccm) issues.push("Enter CCM date.");
+      if (!cpm) issues.push("Enter CPM date.");
+
+      // default outputs
+      ccmWindow.textContent = "—";
+      ccmStatus.textContent = "—";
+      cpmWindow.textContent = "—";
+      cpmStatus.textContent = "—";
+      orderStatus.textContent = "—";
+
+      if (issues.length){
+        setOverall(false, issues[0]);
+        jsonOut.value = JSON.stringify({ issues }, null, 2);
+        return { ok:false, issues };
+      }
+
+      // Valid windows relative to TODAY using ±range days
+      const ccmFrom = addDays(ccm, -range);
+      const ccmTo   = addDays(ccm, +range);
+      const cpmFrom = addDays(cpm, -range);
+      const cpmTo   = addDays(cpm, +range);
+
+      const ccmValid = (stamp(today) >= stamp(ccmFrom) && stamp(today) <= stamp(ccmTo));
+      const cpmValid = (stamp(today) >= stamp(cpmFrom) && stamp(today) <= stamp(cpmTo));
+
+      const orderOk = stamp(cpm) >= stamp(ccm); // CPM on/after CCM
+      const overallOk = ccmValid && cpmValid && orderOk;
+
+      ccmWindow.textContent = `${fmt(ccmFrom)} → ${fmt(ccmTo)}`;
+      cpmWindow.textContent = `${fmt(cpmFrom)} → ${fmt(cpmTo)}`;
+
+      ccmStatus.textContent = ccmValid ? "VALID" : "NOT VALID";
+      cpmStatus.textContent = cpmValid ? "VALID" : "NOT VALID";
+      orderStatus.textContent = orderOk ? "YES" : "NO";
+
+      const short = overallOk
+        ? "Both CCM and CPM are valid today, and CPM is on/after CCM."
+        : "One or more checks failed (see CCM/CPM status and CPM ≥ CCM).";
+
+      setOverall(overallOk, short);
+
+      const payload = {
+        asOf: fmt(today),
+        subsidiary: sel.name,
+        area: sel.area,
+        rangeDays: range,
+        ccmDate: fmt(ccm),
+        cpmDate: fmt(cpm),
+        ccmWindow: { from: fmt(ccmFrom), to: fmt(ccmTo) },
+        cpmWindow: { from: fmt(cpmFrom), to: fmt(cpmTo) },
+        ccmValidToday: ccmValid,
+        cpmValidToday: cpmValid,
+        cpmOnOrAfterCcm: orderOk,
+        overallValid: overallOk
+      };
+
+      jsonOut.value = JSON.stringify(payload, null, 2);
+      return payload;
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", calculate);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      // reset inputs (only those in this page)
+      elSubsidiary.value = "";
+      elArea.value = "";
+      elRangeHint.textContent = "CCM Range: —";
+      elCCM.value = "";
+      elCPM.value = "";
+
+      overallChip.classList.remove("good","bad");
+      overallText.textContent = "Waiting for input";
+      overallShort.textContent = "—";
+
+      ccmWindow.textContent = "—";
+      ccmStatus.textContent = "—";
+      cpmWindow.textContent = "—";
+      cpmStatus.textContent = "—";
+      orderStatus.textContent = "—";
+      jsonOut.value = "";
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      const payload = calculate();
+      const text =
+        payload && payload.subsidiary
+          ? `As of ${payload.asOf} | ${payload.subsidiary} (${payload.area}) ±${payload.rangeDays}d | CCM: ${payload.ccmValidToday ? "VALID" : "NOT VALID"} | CPM: ${payload.cpmValidToday ? "VALID" : "NOT VALID"} | CPM≥CCM: ${payload.cpmOnOrAfterCcm ? "YES" : "NO"} | OVERALL: ${payload.overallValid ? "VALID" : "NOT VALID"}`
+          : jsonOut.value;
+
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast("Copied!");
+      }catch(e){
+        // fallback
+        jsonOut.focus();
+        jsonOut.select();
+        document.execCommand("copy");
+        showToast("Copied (fallback)");
+      }
+    });
+
+    // Optional auto-calc on input
+    [elCCM, elCPM].forEach(el => el.addEventListener("input", () => {
+      if (elSubsidiary.value) calculate();
+    }));
+
+    updateHint();
+  </script>
+</body>
+</html>
