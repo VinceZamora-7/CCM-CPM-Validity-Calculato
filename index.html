@@ -2,91 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CCM/CPM Validity Calculator</title>
-  <link rel="stylesheet" href="stryle.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="wrap">
-    <section class="card">
-      <div class="head">
+  <main class="wrap" aria-label="CCM/CPM Validity Calculator">
+    <!-- Calculator -->
+    <section class="card" aria-labelledby="pageTitle">
+      <header class="head">
         <div class="title">
           <div class="logo" aria-hidden="true"></div>
           <div>
-            <h1>CCM/CPM Validity Calculator</h1>
-            <p class="sub" id="todayText"></p>
+            <h1 id="pageTitle">CCM/CPM Validity Calculator</h1>
+            <p class="sub" id="todayText" aria-live="polite"></p>
           </div>
         </div>
 
         <div class="head-actions">
-          <div class="pill">CPM + 4 calendar days • CCM + N business days</div>
+          <div class="pill" aria-label="Rules summary">
+            CPM + 4 calendar days • CCM + N business days
+          </div>
+
           <div class="theme-toggle" role="group" aria-label="Theme toggle">
-            <button id="btnDark" type="button" class="active" aria-label="Dark mode">Dark</button>
-            <button id="btnLight" type="button" aria-label="Light mode">Light</button>
+            <button id="btnDark" type="button" class="active" aria-label="Switch to dark mode">Dark</button>
+            <button id="btnLight" type="button" aria-label="Switch to light mode">Light</button>
           </div>
         </div>
-      </div>
+      </header>
 
       <div class="body">
-        <div>
-          <label for="subsidiaryInput">Subsidiary</label>
+        <form id="calcForm" novalidate>
+          <!-- Subsidiary -->
+          <fieldset>
+            <legend class="sr-only">Subsidiary selection</legend>
 
-          <div class="combo" id="combo" role="combobox" aria-haspopup="listbox" aria-expanded="false">
-            <div class="combo-field">
-              <input
-                id="subsidiaryInput"
-                class="combo-input"
-                type="text"
-                placeholder="Click arrow or type to search…"
-                autocomplete="off"
-                aria-autocomplete="list"
-                aria-controls="comboList"
-              />
-              <button class="combo-btn" id="comboBtn" type="button" aria-label="Open dropdown">▾</button>
+            <label for="subsidiaryInput">Subsidiary</label>
+
+            <div
+              class="combo"
+              id="combo"
+              role="combobox"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-owns="comboList"
+            >
+              <div class="combo-field">
+                <input
+                  id="subsidiaryInput"
+                  class="combo-input"
+                  type="text"
+                  placeholder="Click arrow or type to search…"
+                  autocomplete="off"
+                  aria-autocomplete="list"
+                  aria-controls="comboList"
+                  aria-describedby="rangeHint unknownHint"
+                />
+                <button class="combo-btn" id="comboBtn" type="button" aria-label="Open dropdown">
+                  ▾
+                </button>
+              </div>
+
+              <div class="combo-menu" id="comboMenu">
+                <div class="combo-list" id="comboList" role="listbox" aria-label="Subsidiary options"></div>
+              </div>
             </div>
 
-            <div class="combo-menu" id="comboMenu">
-              <div class="combo-list" id="comboList" role="listbox" aria-label="Subsidiary options"></div>
+            <p class="small" id="rangeHint">CCM Range: —</p>
+            <p class="small warn-text" id="unknownHint" style="display:none;">
+              Please select a valid subsidiary from the dropdown.
+            </p>
+          </fieldset>
+
+          <!-- Dates -->
+          <fieldset class="mt-12">
+            <legend class="sr-only">Dates</legend>
+
+            <div class="row">
+              <div>
+                <label for="ccmDate">CCM Date</label>
+                <input id="ccmDate" type="date" aria-label="CCM Date" />
+              </div>
+
+              <div>
+                <label for="cpmDate">CPM Date</label>
+                <input id="cpmDate" type="date" aria-label="CPM Date" />
+              </div>
             </div>
+          </fieldset>
+
+          <!-- Actions -->
+          <div class="btns" role="group" aria-label="Calculator actions">
+            <button class="primary" type="button" id="calcBtn">Calculate</button>
+            <button type="button" id="resetBtn">Reset</button>
+            <button type="button" id="copyBtn">Copy Result</button>
           </div>
 
-          <div class="small" id="rangeHint">CCM Business Days: —</div>
-          <div class="small warn-text" id="unknownHint" style="display:none;">Please select a valid subsidiary from the dropdown.</div>
-        </div>
-
-        <div class="row" style="margin-top:12px;">
-          <div>
-            <label for="ccmDate">CCM Date</label>
-            <input id="ccmDate" type="date" aria-label="CCM Date" />
-          </div>
-          <div>
-            <label for="cpmDate">CPM Date</label>
-            <input id="cpmDate" type="date" aria-label="CPM Date" />
-          </div>
-        </div>
-
-        <div class="btns">
-          <button class="primary" type="button" id="calcBtn">Calculate</button>
-          <button type="button" id="resetBtn">Reset</button>
-          <button type="button" id="copyBtn">Copy Result</button>
-        </div>
-
-        <p class="hint">
-          <b>CPM END</b> = CPM Date + <b>4 calendar days</b><br/>
-          <b>CCM END</b> = CCM Date + <b>N business days</b> (based on subsidiary)<br/>
-          If <b>Today &gt; END Date</b> ⇒ expired. If either expired ⇒ <b>DATA NOT VALID</b>.
-        </p>
+          <p class="hint" aria-label="Formula details">
+            <b>CPM END</b> = CPM Date + <b>4 calendar days</b><br />
+            <b>CCM END</b> = CCM Date + <b>N business days</b> (based on subsidiary)<br />
+            If <b>Today &gt; END Date</b> ⇒ expired. If either expired ⇒ <b>DATA NOT VALID</b>.
+          </p>
+        </form>
       </div>
     </section>
 
-    <section class="card">
-      <div class="head">
-        <p class="sub">Result</p>
-        <div class="sub">Valid / Not Valid</div>
-      </div>
+    <!-- Result -->
+    <section class="card" aria-labelledby="resultTitle">
+      <header class="head">
+        <p class="sub" id="resultTitle">Result</p>
+        <div class="sub" aria-hidden="true">Valid / Not Valid</div>
+      </header>
 
       <div class="body">
-        <div class="status" aria-live="polite">
+        <div class="status" aria-live="polite" aria-atomic="true">
           <div class="chip" id="overallChip">
             <span class="dot" aria-hidden="true"></span>
             <span id="overallText">Waiting for input</span>
@@ -94,20 +124,36 @@
           <div class="sub" id="overallShort">—</div>
         </div>
 
-        <div class="kv">
-          <div class="item"><div class="k">CPM END Date</div><div class="v" id="cpmEnd">—</div></div>
-          <div class="item"><div class="k">CPM Status</div><div class="v" id="cpmStatus">—</div></div>
-          <div class="item"><div class="k">CCM END Date</div><div class="v" id="ccmEnd">—</div></div>
-          <div class="item"><div class="k">CCM Status</div><div class="v" id="ccmStatus">—</div></div>
+        <div class="kv" role="list" aria-label="Calculated fields">
+          <div class="item" role="listitem">
+            <div class="k">CPM END Date</div>
+            <div class="v" id="cpmEnd">—</div>
+          </div>
+
+          <div class="item" role="listitem">
+            <div class="k">CPM Status</div>
+            <div class="v" id="cpmStatus">—</div>
+          </div>
+
+          <div class="item" role="listitem">
+            <div class="k">CCM END Date</div>
+            <div class="v" id="ccmEnd">—</div>
+          </div>
+
+          <div class="item" role="listitem">
+            <div class="k">CCM Status</div>
+            <div class="v" id="ccmStatus">—</div>
+          </div>
         </div>
 
+        <label class="sr-only" for="jsonOut">Result JSON</label>
         <textarea id="jsonOut" readonly placeholder="Result JSON will appear here..."></textarea>
       </div>
     </section>
-  </div>
 
-  <div class="toast" id="toast">Copied!</div>
+    <div class="toast" id="toast" role="status" aria-live="polite">Copied!</div>
+  </main>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
