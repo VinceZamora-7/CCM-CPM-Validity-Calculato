@@ -25,6 +25,7 @@
 
   // ---------- Data ----------
   const SUBSIDIARIES = [
+    { name:"Asia HQ", bdays:2 },{ name:"Emea HQ", bdays:2 },{ name:"Americas HQ", bdays:2 },
     { name:"Australia", bdays:2 }, { name:"New Zealand", bdays:2 }, { name:"Vietnam", bdays:2 },
     { name:"Thailand", bdays:2 }, { name:"Singapore", bdays:2 }, { name:"South East Asia Multi Country", bdays:2 },
     { name:"Indonesia", bdays:2 }, { name:"Malaysia", bdays:2 }, { name:"Brunei", bdays:2 }, { name:"Cambodia", bdays:2 },
