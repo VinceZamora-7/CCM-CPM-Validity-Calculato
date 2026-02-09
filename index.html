@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CCM/CPM Validity Calculator</title>
   <link rel="stylesheet" href="style.css" />
+      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
 </head>
 
-<body>
+<body class="mb-12">
   <main class="wrap" aria-label="CCM/CPM Validity Calculator">
     <!-- Calculator -->
     <section class="card" aria-labelledby="pageTitle">
@@ -152,6 +154,32 @@
     </section>
 
     <div class="toast" id="toast" role="status" aria-live="polite">Copied!</div>
+
+<div class="my-6 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-4 dark:border-white/10">
+  <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+    <span class="leading-none">Powered by</span>
+
+    <span
+      class="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-2.5 py-1
+             shadow-sm backdrop-blur-sm transition
+             hover:bg-white hover:border-slate-200
+             dark:border-white/10 dark:bg-white/10 dark:hover:bg-white/15"
+    >
+      <img
+        width="16"
+        height="16"
+        src="img/CGlogo.png"
+        alt="CodeGen"
+        class="opacity-90"
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="font-semibold text-slate-700 dark:text-slate-200">CodeGen</span>
+    </span>
+  </div>
+
+</div>
+
   </main>
 
   <script src="script.js"></script>
