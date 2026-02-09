@@ -9,6 +9,7 @@
   --good:#2ee59d;
   --bad:#ff5c7a;
   --warn:#ffcc66;
+  --credits:#000000;
 
   /* ---- surfaces ---- */
   --shadow:0 18px 50px rgba(0,0,0,.35);
@@ -39,6 +40,11 @@
 }
 
 /* Light mode overrides */
+
+.credits {
+  color: var(--credits);
+}
+
 body.light{
   --bg:#f6f7fb;
   --card: rgba(15,23,42,.05);
