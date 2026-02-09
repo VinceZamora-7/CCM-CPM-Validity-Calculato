@@ -18,7 +18,7 @@
   }
 
   function initTheme() {
-    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
     btnDark.addEventListener("click", () => applyTheme("dark"));
     btnLight.addEventListener("click", () => applyTheme("light"));
   }
